@@ -71,6 +71,54 @@ app.patch('/users/:id', async (req, res) => {
     }
 })
 
+app.delete('/users/:id', async (req, res) => {
+    try {
+        const userToDelete = await User.findByIdAndDelete(req.params.id)
+        
+        if (!userToDelete) {
+            return res.status(404).send()
+        }
+
+        res.send(userToDelete)
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+app.delete('/tasks/:id', async (req, res) => {
+    try {
+        const taskToDelete = await Task.findByIdAndDelete(req.params.id)
+        
+        if (!taskToDelete) {
+            return res.status(404).send()
+        }
+
+        res.send(taskToDelete)
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+app.patch('/tasks/:id', async (req, res) => {
+    const updateInput = Object.keys(req.body)
+    const allowedUpdates = ['description', 'completed']
+    const isValidOperation = updateInput.every((update) => allowedUpdates.includes(update))
+
+    if (!isValidOperation) {
+        return res.status(400).send({error: 'Invalid updates!'})
+    }
+    
+    try {
+        const task = await Task.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        if (!task) {
+            return res.status(404).send()
+        }
+        res.send(task)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
+
 app.post('/tasks', async (req, res) => {
     const task = new Task(req.body)
 
