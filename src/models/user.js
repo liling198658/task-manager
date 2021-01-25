@@ -41,6 +41,10 @@ const userSchema = new mongoose.Schema({
     }
 })
 
+userSchema.pre('save', async function (next) {           //using standard function because of biding this
+    const user = this
+})
+
 const User = mongoose.model('User', userSchema)
 
 
