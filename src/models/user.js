@@ -1,3 +1,5 @@
+// middleware is a way to customize the behavior of my mongoose model
+
 const mongoose = require('mongoose')
 const validator = require('validator')
 
@@ -41,8 +43,12 @@ const userSchema = new mongoose.Schema({
     }
 })
 
-userSchema.pre('save', async function (next) {           //using standard function because of biding this
+userSchema.pre('save', async function (next) {           //using standard function because of binding this
     const user = this
+
+    console.log('Just before saving!')
+    
+    next()
 })
 
 const User = mongoose.model('User', userSchema)
