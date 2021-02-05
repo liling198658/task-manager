@@ -1,8 +1,8 @@
 const express = require('express')
 const Task = require('../models/task')
-const taskRouter = new express.Router()
+const router = new express.Router()
 
-taskRouter.delete('/tasks/:id', async (req, res) => {
+router.delete('/tasks/:id', async (req, res) => {
     try {
         const taskToDelete = await Task.findByIdAndDelete(req.params.id)
         
@@ -16,7 +16,7 @@ taskRouter.delete('/tasks/:id', async (req, res) => {
     }
 })
 
-taskRouter.patch('/tasks/:id', async (req, res) => {
+router.patch('/tasks/:id', async (req, res) => {
     const updateInput = Object.keys(req.body)
     const allowedUpdates = ['description', 'completed']
     const isValidOperation = updateInput.every((update) => allowedUpdates.includes(update))
@@ -26,7 +26,14 @@ taskRouter.patch('/tasks/:id', async (req, res) => {
     }
     
     try {
-        const task = await Task.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+        const task = await Task.findById(req.params.id)
+
+        updateInput.forEach((update) => task[update] = req.body[update])
+        
+        await task.save()
+
+        // const task = await Task.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true})
+
         if (!task) {
             return res.status(404).send()
         }
@@ -36,7 +43,7 @@ taskRouter.patch('/tasks/:id', async (req, res) => {
     }
 })
 
-taskRouter.post('/tasks', async (req, res) => {
+router.post('/tasks', async (req, res) => {
     const task = new Task(req.body)
 
     try {
@@ -47,7 +54,7 @@ taskRouter.post('/tasks', async (req, res) => {
     }
 })
 
-taskRouter.get('/tasks', async (req, res) => {
+router.get('/tasks', async (req, res) => {
 
     try {
         const tasks = await Task.find({})
@@ -58,7 +65,7 @@ taskRouter.get('/tasks', async (req, res) => {
 })
     
 
-taskRouter.get('/tasks/:id', async (req, res) => {
+router.get('/tasks/:id', async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -72,4 +79,4 @@ taskRouter.get('/tasks/:id', async (req, res) => {
     }
 })
 
-module.exports = taskRouter
+module.exports = router

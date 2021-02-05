@@ -1,9 +1,9 @@
 const express = require('express')
 const User = require('../models/user')
-const userRouter = new express.Router()
+const router = new express.Router()
 
 
-userRouter.post('/users', async (req, res) => {
+router.post('/users', async (req, res) => {       // For signing up
     const user = new User(req.body)
 
     try {
@@ -20,7 +20,16 @@ userRouter.post('/users', async (req, res) => {
     // })
 })
 
-userRouter.get('/users', async (req, res) => {
+router.post('/users/login', async (req, res) => {           // For loging in
+    try {
+        const user = await User.findByCredentials(req.body.email, req.body.password)
+        res.send(user)
+    } catch (e) {
+        res.status(400).send('Not working')
+    }
+})
+
+router.get('/users', async (req, res) => {
 
     try {
         const users = await User.find({})
@@ -31,7 +40,7 @@ userRouter.get('/users', async (req, res) => {
     
 })
 
-userRouter.get('/users/:id', async (req, res) => {
+router.get('/users/:id', async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -45,8 +54,10 @@ userRouter.get('/users/:id', async (req, res) => {
     }
 })
 
-userRouter.patch('/users/:id', async (req, res) => {
+router.patch('/users/:id', async (req, res) => {
     const updateInput = Object.keys(req.body)
+    // console.log(updateInput)
+    // console.log(req.body)
     const allowedUpdates = ['name', 'email', 'password', 'age']
     const isValidOperation = updateInput.every((update) => allowedUpdates.includes(update))
 
@@ -56,7 +67,7 @@ userRouter.patch('/users/:id', async (req, res) => {
     
     try {
         const user = await User.findById(req.params.id)
-
+        // console.log(user)
         updateInput.forEach((update) => user[update] = req.body[update]) 
         
         await user.save()
@@ -72,7 +83,7 @@ userRouter.patch('/users/:id', async (req, res) => {
     }
 })
 
-userRouter.delete('/users/:id', async (req, res) => {
+router.delete('/users/:id', async (req, res) => {
     try {
         const userToDelete = await User.findByIdAndDelete(req.params.id)
         
@@ -87,4 +98,4 @@ userRouter.delete('/users/:id', async (req, res) => {
 })
 
 
-module.exports = userRouter
+module.exports = router
